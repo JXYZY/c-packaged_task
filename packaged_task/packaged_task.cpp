@@ -13,7 +13,7 @@ int get_int(int x)
 
 int main()
 {
-#if 1
+#if 0
 	//构造函数
 	std::packaged_task<int(int)> foo(get_int);
 	std::future<int> fut = foo.get_future();
@@ -31,6 +31,27 @@ int main()
 	std::thread(std::move(foo), 99).detach();
 	std::cout << "Thre triple of 99 is " << futTest.get() << ".\n";
 
+#endif
+#if 1
+	//valid
+	std::packaged_task<int(int)> foo(get_int);
+	//std::packaged_task<void()> bar([]() {});
+	std::packaged_task<void()> bar; // 缺省构造 不合法
+	std::future<int> fut;
+	if (foo.valid() == true)
+	{
+		fut = foo.get_future();
+		foo(3);
+		std::cout << "3的3倍是：" << fut.get() << std::endl;
+	}
+	if (fut.valid())
+	{
+		std::cout << "foo get之后仍然是合法的" << std::endl;
+	}
+	if (bar.valid())
+	{
+		std::cout << "bar是合法的" << std::endl;
+	}
 #endif
 	return 0;
 }
