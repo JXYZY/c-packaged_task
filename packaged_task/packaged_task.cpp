@@ -2,10 +2,37 @@
 //
 
 #include <iostream>
+#include <thread>
+#include <future>
+
+int get_int(int x)
+{
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+	return x * 3;
+}
 
 int main()
 {
-    std::cout << "Hello World!\n";
+#if 1
+	//构造函数
+	std::packaged_task<int(int)> foo(get_int);
+	std::future<int> fut = foo.get_future();
+	std::future<int> futTest;
+	/*std::thread t1(std::move(foo),2);
+	t1.detach();*/
+	foo(2);
+	//其实future.get本身自带阻塞，会阻塞当前线程，所以前面用join和detach都无所谓
+	//int value = fut.get();
+	std::cout << "triple 2 is:" << fut.get() << std::endl;
+
+	//reset 如果不进行reset的话那么不能够两次调用get_future
+	foo.reset();
+	futTest = foo.get_future();
+	std::thread(std::move(foo), 99).detach();
+	std::cout << "Thre triple of 99 is " << futTest.get() << ".\n";
+
+#endif
+	return 0;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
